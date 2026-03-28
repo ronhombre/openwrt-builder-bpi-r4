@@ -1,0 +1,92 @@
+name: Build OpenWRT for BPI-R4 with danpawlik:add-eeprom patch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf \
+            "$AGENT_TOOLSDIRECTORY" \
+            /opt/ghc \
+            /opt/google/chrome \
+            /opt/microsoft/msedge \
+            /opt/microsoft/powershell \
+            /opt/pipx \
+            /usr/lib/mono \
+            /usr/local/julia* \
+            /usr/local/lib/android \
+            /usr/local/lib/node_modules \
+            /usr/local/share/chromium \
+            /usr/local/share/powershell \
+            /usr/share/dotnet \
+            /usr/share/swift
+
+      - name: Install OpenWRT Build Tools
+        run: |
+          sudo apt update
+          sudo apt install build-essential clang flex bison g++ gawk gcc-multilib g++-multilib gettext git libncurses5-dev libssl-dev python3-setuptools rsync swig unzip zlib1g-dev file wget
+      - name: Prepare builder
+        run: |
+          sudo chmod +x ./prepare.sh
+          ./prepare.sh
+
+      - name: Build
+        run: |
+          sudo chmod +x ./build.sh
+          ./build.sh
+
+      - name: Prepare GitHub Pages deployment
+        run: |
+          mkdir -p public/releases/${{ github.ref_name }}
+
+          cp openwrt/bin/* public/releases/${{ github.ref_name }} || true
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public'
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Create new Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.repository_owner }}-${{ github.ref_name }}
+          name: OpenWRT BPI-R4 with danpawlik:add-eeprom patch | ${{ github.repository_owner }}-${{ github.ref_name }}
+
+          body: |
+            ## OpenWRT BPI-R4 with danpawlik:add-eeprom patch
+            
+            Built using GitHub Actions.
+
+            ### ${{ github.repository_owner }}-${{ github.ref_name }}
+
+            `vim /etc/apk/repositories.d/distfeeds.list`
+            ```
+            # Add at the bottom
+            https://openwrt.hombre.asia/releases/${{ github.ref_name }}/targets/mediatek/filogic/packages/packages.adb
+            ```
+
+            This release has been brought to you by the OpenWRT contributors, danpawlik and @ronhombre.
+
+          files: |
+            openwrt/bin/targets/mediatek/filogic/*
+            !openwrt/bin/targets/mediatek/filogic/packages/*
