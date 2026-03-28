@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -52,7 +52,7 @@ jobs:
         run: |
           mkdir -p public/releases/${{ github.ref_name }}
 
-          cp openwrt/bin/* public/releases/${{ github.ref_name }} || true
+          cp -r openwrt/bin/* public/releases/${{ github.ref_name }} || true
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
