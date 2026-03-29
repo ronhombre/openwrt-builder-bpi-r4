@@ -1,5 +1,8 @@
 # OpenWRT BPI-R4 with [danpawlik:add-eeprom patch](https://github.com/openwrt/openwrt/pull/22447/files)
 
+> [!WARNING]
+> Currently, 25.12.2 build is unstable. The config is not being recognized as expected and there are missing content in the distfeeds.list file for APK. Fixes will be released for 25.12.3 and up builds ONLY.
+
 ## Config
 - Sinovoip Banana Pi BPI-R4
 - All Kernel Modules (will be built as downloadable packages)
