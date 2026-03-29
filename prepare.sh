@@ -15,6 +15,9 @@ cp config openwrt/.config
 
 cd openwrt
 
+./scripts/feeds update -a
+./scripts/feeds install -a
+
 make -j$(nproc) defconfig download
 
 cd -
