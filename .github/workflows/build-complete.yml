@@ -84,7 +84,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
           
-          keep_files: false
+          keep_files: true
 
       - name: Create new Release
         uses: softprops/action-gh-release@v2
